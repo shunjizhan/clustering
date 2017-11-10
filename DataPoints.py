@@ -1,42 +1,41 @@
-# =======================================================================
 import sys
 import math
-# =======================================================================
+
+
 class DataPoints:
-    # -------------------------------------------------------------------
     def __init__(self, x, y, label):
         self.x = x
         self.y = y
         self.label = label
         self.isAssignedToCluster = False
-    # -------------------------------------------------------------------
+
     def __key(self):
         return (self.label, self.x, self.y)
-    # -------------------------------------------------------------------
+
     def __eq__(self, other):
         return self.__key() == other.__key()
-    # -------------------------------------------------------------------
+
     def __hash__(self):
         return hash(self.__key())
-    # -------------------------------------------------------------------
+
     @staticmethod
     def getMean(clusters, mean):
         # Initialize the mean for each cluster
         # ****************Please Fill Missing Lines Here*****************
         pass
-    # -------------------------------------------------------------------
+
     @staticmethod
     def getStdDeviation(clusters, mean, stddev):
         # Initialize the std for each cluster
         # ****************Please Fill Missing Lines Here*****************
         pass
-    # -------------------------------------------------------------------
+
     @staticmethod
     def getCovariance(clusters, mean, stddev, cov):
         # Initialize the cov for each cluster
         # ****************Please Fill Missing Lines Here*****************
         pass
-    # -------------------------------------------------------------------
+
     @staticmethod
     def getNMIMatrix(clusters, noOfLabels):
         nmiMatrix = [[0 for x in range(len(clusters) + 1)] for y in range(noOfLabels + 1)]
@@ -68,7 +67,7 @@ class DataPoints:
             nmiMatrix[i][len(clusters)] = totalRow
         nmiMatrix[noOfLabels][len(clusters)] = lastRowCol
         return nmiMatrix
-    # -------------------------------------------------------------------
+
     @staticmethod
     def calcNMI(nmiMatrix):
         # calculate I
@@ -98,14 +97,14 @@ class DataPoints:
         if math.sqrt(HC * HOmega) == 0.0:
             return 0.0
         return I / math.sqrt(HC * HOmega)
-    # -------------------------------------------------------------------
+
     @staticmethod
     def getNoOFLabels(dataSet):
         labels = set()
         for point in dataSet:
             labels.add(point.label)
         return len(labels)
-    # -------------------------------------------------------------------
+
     @staticmethod
     def writeToFile(noise, clusters, fileName):
         # write clusters to file for plotting
@@ -117,4 +116,3 @@ class DataPoints:
             for point in clusters[w]:
                 f.write(str(point.x) + "," + str(point.y) + "," + str((w + 1)) + "\n")
         f.close()
-# =======================================================================
