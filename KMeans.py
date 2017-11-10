@@ -1,9 +1,8 @@
 from DataPoints import DataPoints
-import matplotlib.pyplot as plt
+from Plotter import Plotter
 import random
 import sys
 import math
-
 
 
 def sqrt(n):
@@ -127,14 +126,8 @@ class KMeans:
         nmi = DataPoints.calcNMI(nmiMatrix)
         print("NMI :" + str(nmi))
 
-        # write clusters to file for plotting
-        dot_types = ['ro', 'bo', 'yo']
-        for w in range(self.K):
-            print("Cluster " + str(w) + " size :" + str(len(clusters[w])))
-            dot_type = dot_types[w]
-            for p in clusters[w]:
-                plt.plot(p.x, p.y, dot_type)
-        plt.show()
+        # plot the result
+        Plotter.plot(clusters)
 
     def reassignClusters(self, dataSet, c, clusters):
         for j in range(self.K):
@@ -174,7 +167,7 @@ class KMeans:
     def getMaxClusterLabel(cluster):
         labelCounts = {}
         for point in cluster:
-            if not point.label in labelCounts:
+            if point.label not in labelCounts:
                 labelCounts[point.label] = 0
             labelCounts[point.label] += 1
         max = -sys.maxint - 1

@@ -1,16 +1,17 @@
-# =======================================================================
 from KMeans import KMeans
 from DataPoints import DataPoints
+from Plotter import Plotter
 import random
 import math
-# =======================================================================
+import numpy as np
+
+
 class DBSCAN:
-    # -------------------------------------------------------------------
     def __init__(self):
         self.e = 0.0
         self.minPts = 3
         self.noOfLabels = 0
-    # -------------------------------------------------------------------
+
     def main(self, args):
         seed = 71
         print("For dataset1")
@@ -36,12 +37,27 @@ class DBSCAN:
         self.e = self.getEpsilon(dataSet)
         print("Esp :" + str(self.e))
         self.dbscan(dataSet)
-    # -------------------------------------------------------------------
+
+    # used method is this paper:
+    # http://iopscience.iop.org/article/10.1088/1755-1315/31/1/012012/pdf
     def getEpsilon(self, dataSet):
-        sumOfDist = 0.0
-        # ****************Please Fill Missing Lines Here*****************
-        return sumOfDist/len(dataSet)
-    # -------------------------------------------------------------------
+        total = len(dataSet)
+        distances = np.zeros((total, total), dtype=np.float)
+        for i in range(total):
+            for j in range(total):
+                p1, p2 = dataSet[i], dataSet[j]
+                distances[i][j] = self.getEuclideanDist(p1.x, p1.y, p2.x, p2.y)
+
+        # find k-distances
+        k_distances = []
+        for i in range(total):
+            dists_one_point = distances[i, :]
+            k_distances.append(self.findKDist(dists_one_point))
+        k_distances = sorted(k_distances)
+
+        # return the rapid growth distance, which is roughly at the last 4% of distances.
+        return k_distances[-1 * int(0.04 * len(k_distances))]
+
     def dbscan(self, dataSet):
         clusters = []
         visited = set()
@@ -56,9 +72,9 @@ class DBSCAN:
             N = []
             minPtsNeighbours = 0
 
-            # check which point satisfies minPts condition 
+            # check which point satisfies minPts condition
             for j in range(len(dataSet)):
-                if i==j:
+                if i == j:
                     continue
                 pt = dataSet[j]
                 dist = self.getEuclideanDist(point.x, point.y, pt.x, pt.y)
@@ -76,7 +92,7 @@ class DBSCAN:
                     point1 = N[j]
                     minPtsNeighbours1 = 0
                     N1 = []
-                    if not point1 in visited:
+                    if point1 not in visited:
                         visited.add(point1)
                         for l in range(len(dataSet)):
                             pt = dataSet[l]
@@ -120,7 +136,10 @@ class DBSCAN:
         print("NMI :" + str(nmi))
 
         DataPoints.writeToFile(noise, clusters, "DBSCAN_dataset3.csv")
-    # -------------------------------------------------------------------
+
+        # plot the result
+        Plotter.plot(clusters)
+
     def removeDuplicates(self, n, n1):
         for point in n1:
             isDup = False
@@ -129,11 +148,33 @@ class DBSCAN:
                     isDup = True
             if not isDup:
                 n.append(point)
-    # -------------------------------------------------------------------
+
     def getEuclideanDist(self, x1, y1, x2, y2):
         dist = math.sqrt(pow((x2-x1), 2) + pow((y2-y1), 2))
         return dist
-# =======================================================================
+
+    def findKDist(self, distances):
+        k = 3
+        k_distances = []
+        for i in range(k):
+            k_distances.append(distances[i])
+
+        max_, max_index = self.maxAndIndex(k_distances)
+        for j in range(k, len(distances)):
+            d = distances[j]
+            if(d < max_):
+                k_distances[max_index] = d
+                max_, max_index = self.maxAndIndex(k_distances)
+
+        return max_
+
+    @staticmethod
+    def maxAndIndex(arr):
+        max_ = max(arr)
+        max_index = arr.index(max_)
+        return max_, max_index
+
+
 if __name__ == "__main__":
     d = DBSCAN()
     d.main(None)

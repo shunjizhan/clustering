@@ -112,7 +112,7 @@ class DataPoints:
         for pt in noise:
             f.write(str(pt.x) + "," + str(pt.y) + ",0" + "\n")
         for w in range(len(clusters)):
-            print("Cluster " + str(w) + " size :" + str(len(clusters[w])))
+            # print("Cluster " + str(w) + " size :" + str(len(clusters[w])))
             for point in clusters[w]:
                 f.write(str(point.x) + "," + str(point.y) + "," + str((w + 1)) + "\n")
         f.close()
