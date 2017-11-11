@@ -19,18 +19,17 @@ class Evaluate:
             p_label = predicts[i] - 1
             x, y = random.uniform(0.0, 5.0), random.uniform(0.0, 5.0)
             clusters[p_label].add(DataPoints(x, y, true_label))
-        return clusters
+        self.clusters = clusters
 
     def purity(self):
-        clusters = self.makeClusters()
         maxLabelCluster = []
         for j in range(self.K):
-            maxLabelCluster.append(self.getMaxClusterLabel(clusters[j]))
+            maxLabelCluster.append(self.getMaxClusterLabel(self.clusters[j]))
         purity = 0.0
         for j in range(self.K):
             purity += maxLabelCluster[j]
         purity /= self.N
-        return purity
+        print 'purity:', purity
 
     def getMaxClusterLabel(self, cluster):
         labelCounts = {}
@@ -44,14 +43,58 @@ class Evaluate:
                 max = labelCounts[label]
         return max
 
+    def P_R_F(self):
+        TP, FN, FP, TN = 0.0, 0.0, 0.0, 0.0
+        for i in range(self.N):
+            for j in range(i + 1, self.N):
+                same_cluster = (self.predicts[i] == self.predicts[j])
+                same_class = (self.reals[i] == self.reals[j])
+
+                if(same_class):
+                    if(same_cluster):
+                        TP += 1
+                    else:
+                        FN += 1
+                else:           # different class
+                    if(same_cluster):
+                        FP += 1
+                    else:
+                        TN += 1
+
+        assert(TP + FN + FP + TN == self.N * (self.N - 1) / 2)
+
+        P = TP / (TP + FP)
+        R = TP / (TP + FN)
+        F = 2 * P * R / (P + R)
+
+        print 'TP:', TP
+        print 'TN:', TN
+        print 'FP:', FP
+        print 'FN:', FN
+        print 'precision:', P
+        print 'recall:', R
+        print 'F-measure:', F
+
+    def NMI(self):
+        # nmiMatrix = DataPoints.getNMIMatrix(self.clusters, self.K)
+        nmiMatrix = [
+            [0, 1, 4, 0, 5],
+            [5, 0, 0, 0, 5],
+            [0, 5, 0, 0, 5],
+            [0, 0, 1, 4, 5],
+            [5, 6, 5, 4, 20],
+        ]
+        nmi = DataPoints.calcNMI(nmiMatrix)
+        print 'NMI:', nmi
+
 
 if __name__ == '__main__':
-    predicts = [3, 3, 1, 1, 1, 4, 3, 3, 4, 2, 4, 2, 1, 2, 3, 2, 1, 2, 4, 4]
-    reals = [2, 2, 3, 3, 3, 4, 2, 2, 3, 1, 4, 1, 3, 1, 2, 1, 2, 1, 4, 4]
+    reals = [3, 3, 1, 1, 1, 4, 3, 3, 4, 2, 4, 2, 1, 2, 3, 2, 1, 2, 4, 4]
+    predicts = [2, 2, 3, 3, 3, 4, 2, 2, 3, 1, 4, 1, 3, 1, 2, 1, 2, 1, 4, 4]
     e = Evaluate(predicts, reals)
-    print e.purity()
-
-
+    e.purity()
+    e.P_R_F()
+    e.NMI()
 
 
 
