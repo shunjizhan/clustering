@@ -4,6 +4,7 @@ from Plotter import Plotter
 from scipy.stats import multivariate_normal
 import math
 
+
 class GMM:
     def __init__(self):
         self.dataSet = []

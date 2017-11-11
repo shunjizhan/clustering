@@ -6,3 +6,6 @@ t2:
 
 t3:
 	python GMM.py
+
+e:
+	python evaluate.py

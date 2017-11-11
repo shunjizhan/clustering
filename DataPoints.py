@@ -47,20 +47,17 @@ class DataPoints:
     def getCovariance(clusters, mean, stddev, cov):
         for i in range(len(clusters)):
             cluster = clusters[i]
-            m, s = mean[i], stddev[i]
+            m = mean[i]
             EX, EY = m[0], m[1]
             size = len(cluster)
-            sum_xx, sum_xy, sum_yx, sum_yy = 0.0, 0.0, 0.0, 0.0
-            # XX
+            sum_xy = 0.0
             for p in cluster:
-                sum_xx = (p.x - EX) * (p.x - EX)
                 sum_xy = (p.x - EX) * (p.y - EY)
-                sum_yx = (p.y - EY) * (p.x - EX)
-                sum_yy = (p.y - EY) * (p.y - EY)
+
             cov[i][0][0] = stddev[i][0] ** 2
-            cov[i][0][1] = sum_xy / size
-            cov[i][1][0] = sum_yx / size
             cov[i][1][1] = stddev[i][1] ** 2
+            cov[i][0][1] = sum_xy / size
+            cov[i][1][0] = sum_xy / size
 
     @staticmethod
     def getNMIMatrix(clusters, noOfLabels):
@@ -69,7 +66,7 @@ class DataPoints:
         for cluster in clusters:
             labelCounts = {}
             for point in cluster:
-                if not point.label in labelCounts:
+                if point.label not in labelCounts:
                     labelCounts[point.label] = 0
                 labelCounts[point.label] += 1
             max = sys.maxint
