@@ -1,11 +1,10 @@
-# =======================================================================
 from DataPoints import DataPoints
 from KMeans import KMeans
-import math
+from Plotter import Plotter
 from scipy.stats import multivariate_normal
-# =======================================================================
+import math
+
 class GMM:
-    # -------------------------------------------------------------------
     def __init__(self):
         self.dataSet = []
         self.K = 0
@@ -14,7 +13,7 @@ class GMM:
         self.coVariance = [[[0.0 for x in range(2)] for y in range(2)] for z in range(3)]
         self.W = None
         self.w = None
-    # -------------------------------------------------------------------
+
     def main(self, args):
         print("For dataset1")
         self.dataSet = KMeans.readDataSet("dataset1.txt")
@@ -36,7 +35,7 @@ class GMM:
         self.W = [[0.0 for y in range(self.K)] for x in range(len(self.dataSet))]
         self.w = [0.0 for x in range(self.K)]
         self.GMM()
-    # -------------------------------------------------------------------
+
     def GMM(self):
         clusters = []
         self.mean = [[0.0 for y in range(2)] for x in range(self.K)]
@@ -61,6 +60,10 @@ class GMM:
         DataPoints.getMean(clusters, self.mean)
         DataPoints.getStdDeviation(clusters, self.mean, self.stdDev)
         DataPoints.getCovariance(clusters, self.mean, self.stdDev, self.coVariance)
+        # print self.mean
+        # print self.stdDev
+        # print self.coVariance[2]
+
         length = 0
         mle_old = 0.0
         mle_new = 0.0
@@ -118,14 +121,9 @@ class GMM:
         nmi = DataPoints.calcNMI(nmiMatrix)
         print("NMI :" + str(nmi))
 
-        # write clusters to file for plotting
-        f = open("GMM.csv", 'w')
-        for w in range(self.K):
-            print("Cluster " + str(w) + " size :" + str(len(clusters[w])))
-            for point in clusters[w]:
-                f.write(str(point.x) + "," + str(point.y) + "," + str(w) + "\n")
-        f.close()
-    # -------------------------------------------------------------------
+        # plot the result
+        Plotter.plot(clusters)
+
     def Estep(self):
         for i in range(len(self.dataSet)):
             denominator = 0.0
@@ -136,39 +134,42 @@ class GMM:
                 denominator += numerator
 
             # normalize W[i][j] into probabilities
-            # ****************Please Fill Missing Lines Here*****************
-    # -------------------------------------------------------------------
+            for k in range(self.K):
+                self.W[i][k] = self.W[i][k] / denominator
+
     def Mstep(self, clusters):
         for j in range(self.K):
             denominator = 0.0
             numerator = 0.0
             numerator1 = 0.0
             cov_xy = 0.0
-            updatedMean1 = 0.0
-            updatedMean2 = 0.0
+            updatedMean_x = 0.0
+            updatedMean_y = 0.0
             for i in range(len(self.dataSet)):
                 denominator += self.W[i][j]
                 numerator += self.W[i][j] * pow((self.dataSet[i].x - self.mean[j][0]), 2)
                 numerator1 += self.W[i][j] * pow((self.dataSet[i].y - self.mean[j][1]), 2)
-                # cov_xy +=?
-                # ****************Please Fill Missing Lines Here*****************
+                cov_xy += self.W[i][j] * (self.dataSet[i].x - self.mean[j][0]) * (self.dataSet[i].y - self.mean[j][1])
 
-                updatedMean1 += self.W[i][j] * self.dataSet[i].x
-                updatedMean2 += self.W[i][j] * self.dataSet[i].y
+                updatedMean_x += self.W[i][j] * self.dataSet[i].x
+                updatedMean_y += self.W[i][j] * self.dataSet[i].y
 
+            # update mean
+            self.mean[j][0] = updatedMean_x / denominator
+            self.mean[j][1] = updatedMean_y / denominator
+
+            # update std
             self.stdDev[j][0] = numerator / denominator
             self.stdDev[j][1] = numerator1 / denominator
+
             # update w[j]
-            # ****************Please Fill Missing Lines Here*****************
-            # update mean
-            self.mean[j][0] = updatedMean1 / denominator
-            self.mean[j][1] = updatedMean2 / denominator
+            self.w[j] = denominator / len(self.dataSet)
 
             # update covariance matrix
             self.coVariance[j][0][0] = self.stdDev[j][0]
             self.coVariance[j][1][1] = self.stdDev[j][1]
             self.coVariance[j][0][1] = self.coVariance[j][1][0] = cov_xy / denominator
-    # -------------------------------------------------------------------
+
     def Likelihood(self):
         mean_zero = [[0.0 for y in range(2)] for x in range(self.K)]
         coVariance_zero = [[[0.0 for z in range(2)] for y in range(2)] for x in range(self.K)]
@@ -182,13 +183,13 @@ class GMM:
                 numerator += self.w[j] * gaussian.pdf([self.dataSet[i].x, self.dataSet[i].y])
             likelihood += math.log(numerator)
         return likelihood
-    # -------------------------------------------------------------------
+
     def printArray(self, mat):
         for i in range(len(mat)):
             for j in range(len(mat[i])):
                 print(str(mat[i][j]) + " "),
             print("")
-    # -------------------------------------------------------------------
+
     def print3D(self, mat):
         for i in range(len(mat)):
             print("For Cluster : " + str((i + 1)))
@@ -197,7 +198,7 @@ class GMM:
                     print(str(mat[i][j][k]) + " "),
                 print("")
             print("")
-    # -------------------------------------------------------------------
+
     # Helper function to plot points in Excel
     def plot(self):
         f = open("xcel.csv", 'w')
@@ -206,7 +207,7 @@ class GMM:
             label = point.label
             f.write(point.x + "," + point.y + "," + point.label + "\n")
         f.close()
-# =======================================================================
+
 if __name__ == "__main__":
     g = GMM()
     g.main(None)

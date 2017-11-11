@@ -20,21 +20,47 @@ class DataPoints:
 
     @staticmethod
     def getMean(clusters, mean):
-        # Initialize the mean for each cluster
-        # ****************Please Fill Missing Lines Here*****************
-        pass
+        for i in range(len(clusters)):
+            cluster = clusters[i]
+            size = len(cluster)
+            sum_x, sum_y = 0.0, 0.0
+            for p in cluster:
+                sum_x += p.x
+                sum_y += p.y
+            mean[i][0] = sum_x / size
+            mean[i][1] = sum_y / size
 
     @staticmethod
     def getStdDeviation(clusters, mean, stddev):
-        # Initialize the std for each cluster
-        # ****************Please Fill Missing Lines Here*****************
-        pass
+        for i in range(len(clusters)):
+            cluster = clusters[i]
+            m = mean[i]
+            size = len(cluster)
+            sum_x, sum_y = 0.0, 0.0
+            for p in cluster:
+                sum_x += (p.x - m[0]) ** 2
+                sum_y += (p.y - m[1]) ** 2
+            stddev[i][0] = math.sqrt(sum_x / size)
+            stddev[i][1] = math.sqrt(sum_y / size)
 
     @staticmethod
     def getCovariance(clusters, mean, stddev, cov):
-        # Initialize the cov for each cluster
-        # ****************Please Fill Missing Lines Here*****************
-        pass
+        for i in range(len(clusters)):
+            cluster = clusters[i]
+            m, s = mean[i], stddev[i]
+            EX, EY = m[0], m[1]
+            size = len(cluster)
+            sum_xx, sum_xy, sum_yx, sum_yy = 0.0, 0.0, 0.0, 0.0
+            # XX
+            for p in cluster:
+                sum_xx = (p.x - EX) * (p.x - EX)
+                sum_xy = (p.x - EX) * (p.y - EY)
+                sum_yx = (p.y - EY) * (p.x - EX)
+                sum_yy = (p.y - EY) * (p.y - EY)
+            cov[i][0][0] = stddev[i][0] ** 2
+            cov[i][0][1] = sum_xy / size
+            cov[i][1][0] = sum_yx / size
+            cov[i][1][1] = stddev[i][1] ** 2
 
     @staticmethod
     def getNMIMatrix(clusters, noOfLabels):
